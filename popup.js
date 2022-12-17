@@ -138,7 +138,7 @@ class bikram {
 
   get firstBar(){
     // return new Date(new Date() - this.day * 24 * 60 * 60 * 1000).getDay()// 0:sunday 6:saturday
-    return (new Date(new Date() - this.day * 24 * 60 * 60 * 1000).getDay() + 1)%7 // 0:sunday 6:saturday
+    return (new Date(new Date() - this.day * 24 * 60 * 60 * 1000).getDay() + 1)%7 + 1// 0:sunday 6:saturday
   }
 
   get weekWord(){
@@ -193,51 +193,27 @@ function domFill(today, firstBar, lastday, id) {
         var textnode = document.createTextNode(smallAD);
         node.appendChild(textnode);
         node.classList.add(adClass)
+        activeDate = parseInt(today) + parseInt(firstBar) - 1
         //!AD
-        document.querySelector("#date-"+j).textContent = nepaliNum(j)
+
+        document.querySelector("#date-"+j).textContent = nepaliNum(j - firstBar +1 )
         document.querySelector("#date-"+j).appendChild(node); // for AD
-        if(j == today){
+        if(j == activeDate){
           document.querySelector("#date-"+j).classList.add("active")
         }
-        if (adDate.date == 1 && offsetDate == today ){
+        if (adDate.date == 1 && offsetDate == activeDate ){
           document.querySelector("small.redDate").classList.add("active")
         }
       }
     }
   }
 }
-// function domFill(today, firstBar, lastday, id) {
-//   var offsetDate = 0;
-//   let adDate = 0;
-//   let smallAD = ""
-//   let adClass = "active"
-//   var limit = parseInt(firstBar) + parseInt(lastday)  ; // loop start from 0;
-//   for (let i = 0; i < limit ; i++){ 
-//     adDate = new ADvalues(firstBar,today,i)
-//     adClass = adDate.date == 1 ? "redDate" : null
-//     smallAD = adDate.date == 1 ? adDate.month : adDate.date
-//     if(i>=firstBar){
-//       offsetDate = i - firstBar + 1; // 1 gate is 0 or (start day) 
-//       var node = document.createElement("SMALL");
-//       var textnode = document.createTextNode(smallAD);
-//       node.appendChild(textnode);
-//       node.classList.add(adClass)
-//       // document.querySelector("#date-"+i).innerHTML = `${nepaliNum(offsetDate)}<small class="${adClass}">${smallAD}</small>`
-//       document.querySelector("#date-"+i).textContent = nepaliNum(offsetDate)
-//       document.querySelector("#date-"+i).appendChild(node);
-//       // document.querySelector("#date-"+i).classList.add(weekendClass)
-//       if(offsetDate == today){
-//         document.querySelector("#date-"+i).classList.add("active")
-//       }
-//       if (adDate.date == 1 && offsetDate == today ){
-//         document.querySelector("small.redDate").classList.add("active")
-//       }
-//     }
-//   }
-// }
 
 
 function domFillDiffrentMonth(firstBar, lastday) {
+  document.querySelector("#printer").innerHTML =firstBar
+  document.querySelector("#header").innerHTML = lastday
+
   for (let j = 1; j <= 42; j++ ) {
     document.querySelector("#date-"+j).innerHTML = ""
   }
@@ -245,13 +221,12 @@ function domFillDiffrentMonth(firstBar, lastday) {
   for (let i = 1; i <= 7 ; i++){ 
     if(i==firstBar){
       for (let j = firstBar ; j <= parseInt(lastday) + firstBar ; j++ ) {
-        document.querySelector("#date-"+j).innerHTML = `${nepaliNum(j - firstBar)}<small class=""></small>`
+        document.querySelector("#date-"+j).innerHTML = `${nepaliNum(j-firstBar + 1)}<small class=""></small>`
       }
     }
   }
-  document.querySelector("#date-"+firstBar).innerHTML = ""
-  document.querySelector("#prev").innerHTML = ""
   document.getElementById("next").remove()
+  document.getElementById("prev").remove()
 
 }
 
@@ -259,48 +234,34 @@ function domFillDiffrentMonth(firstBar, lastday) {
 document.addEventListener('DOMContentLoaded', function() {
   var prevlink = document.getElementById('prev');
   var nextlink = document.getElementById('next');
-
-  // onClick's logic below:
   prevlink.addEventListener('click', function() {
-    prevMonthDaysDiffCount = daysDiffCount - lastdayCurrent
+    prevMonthDaysDiffCount = daysDiffCount - today - 1
     let barx = new bikram(todayToBS(prevMonthDaysDiffCount))
-    let lastdayCurrentx = barx.monthLastDay + 1
+    let lastdayCurrentx = barx.monthLastDay  
     barx.printMonth()
     barx.printYear()
     x = new Date()
-    sumdays = parseInt(barx.todayInNumber) + parseInt(lastdayCurrentx)
+    sumdays = parseInt(today) + parseInt(lastdayCurrentx) - 1
     x.setDate(x.getDate() - sumdays)
     aMonthEarlierDateBar= x.getDay() + 1
-
-
-    // document.getElementById('printer').innerHTML=lastdayCurrentx;
-    // document.getElementById('header').innerHTML=x.toLocaleString();
-    // document.getElementById('footer').innerHTML=aMonthEarlierDateBar;
-    domFillDiffrentMonth(aMonthEarlierDateBar, lastdayCurrentx )
-
-
-
+    domFillDiffrentMonth(aMonthEarlierDateBar, lastdayCurrentx - 1)
   });
   // onClick's logic below:
   nextlink.addEventListener('click', function() {
-    nextMonthDaysDiffCount = daysDiffCount + (lastdayCurrent - today)
-    let barx = new bikram(todayToBS(daysDiffCount))
+    nextMonthDaysDiffCount = daysDiffCount + (lastdayCurrent - (today - bar.firstBar)) + 1
+    let barx = new bikram(todayToBS(nextMonthDaysDiffCount))
     let firstBarCurrentx = barx.firstBar
-    let lastdayCurrentx = barx.monthLastDay + 1
+    let lastdayCurrentx = barx.monthLastDay 
     let todayx = barx.todayInNumber
     barx.printMonth()
     barx.printYear()
     x = new Date()
     sumdays =  parseInt(lastdayCurrentx) - parseInt(barx.todayInNumber) -1
     x.setDate(x.getDate() + sumdays)
-    aMonthEarlierDateBar= x.getDay() + 1
-    document.getElementById('printer').innerHTML=lastdayCurrentx;
-    document.getElementById('header').innerHTML=x.toLocaleString();
-    document.getElementById('footer').innerHTML=aMonthEarlierDateBar;
+    aMonthEarlierDateBar= x.getDay() 
+    // document.querySelector("#printer").innerHTML =aMonthEarlierDateBar
+    // document.querySelector("#header").innerHTML = lastday
     domFillDiffrentMonth(aMonthEarlierDateBar, lastdayCurrentx )
-
-
-
   });
 });
 
@@ -308,11 +269,10 @@ document.addEventListener('DOMContentLoaded', function() {
 let daysDiffCount = daysDiff(new Date().toLocaleDateString())
 let bar = new bikram(todayToBS(daysDiffCount))
 // let bar = new bikram('2078-1-1')
-let firstBarCurrent = bar.firstBar + 1
+let firstBarCurrent = bar.firstBar 
 let lastdayCurrent = bar.monthLastDay
 let today = bar.todayInNumber
 bar.printMonth()
 bar.printYear()
-document.getElementById('footer').innerHTML=today;
 
 domFill(today, firstBarCurrent, lastdayCurrent, "dateHolder" )

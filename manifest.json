@@ -1,7 +1,7 @@
 {
     "name": "Miti",
     "description": "This extension shows Bikram Sambat Calendar date as extension icon, monthly calendar as dropdown for Chrome browser.",
-    "version": "0.0.0.4",
+    "version": "0.0.0.6",
     "manifest_version": 3,
     "background": {
         "service_worker": "background.js"
