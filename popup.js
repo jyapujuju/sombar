@@ -137,12 +137,16 @@ class bikram {
   }
 
   get firstBar() {
+    let x = new Date()
+    let y = x.setDate(x.getDate() - this.day + 1);
+    return new Date(y).getDay();
     // return new Date(new Date() - this.day * 24 * 60 * 60 * 1000).getDay()// 0:sunday 6:saturday
-    return (new Date(new Date() - this.day * 24 * 60 * 60 * 1000).getDay() + 1) % 7 + 1// 0:sunday 6:saturday
+    // return (new Date(new Date() - this.day * 24 * 60 * 60 * 1000).getDay() + 1) % 7 + 1// 0:sunday 6:saturday
+
   }
 
   get weekWord() {
-    return week[this.firstBar()]
+    return week[this.firstBar]
   }
 
   printMonth() {
@@ -165,7 +169,9 @@ class ADvalues {
   }
   adFull() {
     let ad = this.difference - this.incr + this.firstbar - 1; // - 1 because it starts from 0 which excludes first day
-    return new Date(new Date() - ad * 24 * 60 * 60 * 1000)
+    var x = new Date(new Date() - ad * 24 * 60 * 60 * 1000)
+    console.log("full ", x)
+    return x
   }
   get date() {
     return this.adFull().getDate()
@@ -175,34 +181,31 @@ class ADvalues {
   }
 }
 
+function highlightToday(indexIdForDateInDiv) {
+  document.querySelector("#date-" + indexIdForDateInDiv).classList.add("active")
+}
+
+function bsToAD(currentBSDate, firstBar) {
+  z = new Date()
+  adDate = new Date(z.setDate(z.getDate() - (firstBar + 1 - currentBSDate)))
+  return adDate.getDate() == 1 ? adDate.toLocaleString('default', { month: 'short' }) : adDate.getDate()
+}
+
+// function getSmallAdcontent(firstBar, today, j) {
+//   adDate = new ADvalues(firstBar, today, j)
+//   return adDate.date == 1 ? adDate.month : adDate.date
+// }
 
 function domFill(today, firstBar, lastday, id) {
-  var offsetDate = 0;
-  let adDate = 0;
-  let smallAD = ""
-  let adClass = "active"
-  var limit = parseInt(firstBar) + parseInt(lastday); // loop start from 0;
-  for (let i = 1; i <= 7; i++) {
+  console.log(today)
+  for (let i = 0; i <= 7; i++) {
     if (i == firstBar) {
-      for (let j = firstBar; j < limit; j++) {
-        //AD
-        adDate = new ADvalues(firstBar, today, j)
-        adClass = adDate.date == 1 ? "redDate" : null
-        smallAD = adDate.date == 1 ? adDate.month : adDate.date
-        var node = document.createElement("SMALL");
-        var textnode = document.createTextNode(smallAD);
-        node.appendChild(textnode);
-        node.classList.add(adClass)
-        activeDate = parseInt(today) + parseInt(firstBar) - 1
-        //!AD
-
-        document.querySelector("#date-" + j).textContent = nepaliNum(j - firstBar + 1)
-        document.querySelector("#date-" + j).appendChild(node); // for AD
-        if (j == activeDate) {
-          document.querySelector("#date-" + j).classList.add("active")
-        }
-        if (adDate.date == 1 && offsetDate == activeDate) {
-          document.querySelector("small.redDate").classList.add("active")
+      for (let j = 0; j < lastday; j++) {
+        var indexIdForDateInDiv = j + firstBar;
+        document.querySelector("#date-" + indexIdForDateInDiv).getElementsByTagName('span')[0].textContent = nepaliNum(j + 1)
+        document.querySelector("#date-" + indexIdForDateInDiv).getElementsByTagName('small')[0].textContent = bsToAD(j + 1, firstBar)
+        if (indexIdForDateInDiv == today) {
+          highlightToday(indexIdForDateInDiv + firstBar - 1)
         }
       }
     }
