@@ -78,6 +78,25 @@ function calendarSlider(days) {
   }
 }
 
+function bsSlider(daysInBS) {
+  bsday = daysInBS.split("-")[0];
+  bsmonth = daysInBS.split("-")[1];
+  bsyear = daysInBS.split("-")[2];
+  daysCounter = 0;
+  // add previous years
+  for (var i = 0; i < Object.keys(calendar_data).indexOf(bsyear); i++) {
+    daysCounter = daysCounter + Object.values(calendar_data)[i][12];
+  }
+  // add previous months
+
+  for (var j = 1; j < bsmonth; j++) {
+    daysCounter = daysCounter + calendar_data[bsyear][j - 1];
+  }
+
+  // add current datr
+  return daysCounter + parseInt(bsday) - 1
+}
+
 
 
 function todayToBS(days) {
@@ -101,7 +120,12 @@ function geoTObs(bsdate) {
   }
   return "माफ गर्नुहोस अक्षर बुझिएन "
 }
-// todayToBS()
+
+function currentDayinAD(daysDifference) {
+  let x = new Date("4-14-2021")
+  let y = x.setDate(x.getDate() + daysDifference);
+  return new Date(y);
+}
 
 
 
@@ -142,7 +166,12 @@ class bikram {
     return new Date(y).getDay();
     // return new Date(new Date() - this.day * 24 * 60 * 60 * 1000).getDay()// 0:sunday 6:saturday
     // return (new Date(new Date() - this.day * 24 * 60 * 60 * 1000).getDay() + 1) % 7 + 1// 0:sunday 6:saturday
+  }
 
+  get firstMonthName() {
+    let x = new Date()
+    let y = x.setDate(x.getDate() - this.day + 1);
+    return new Date(y).getDate() == 1 ? y.toLocaleString('default', { month: 'short' }) : new Date(y).getDate();
   }
 
   get weekWord() {
@@ -170,7 +199,6 @@ class ADvalues {
   adFull() {
     let ad = this.difference - this.incr + this.firstbar - 1; // - 1 because it starts from 0 which excludes first day
     var x = new Date(new Date() - ad * 24 * 60 * 60 * 1000)
-    console.log("full ", x)
     return x
   }
   get date() {
@@ -181,31 +209,47 @@ class ADvalues {
   }
 }
 
-function highlightToday(indexIdForDateInDiv) {
-  document.querySelector("#date-" + indexIdForDateInDiv).classList.add("active")
+function highlightToday(indexIdForDateInDiv, highlightToday) {
+  if (highlightToday) {
+    document.querySelector("#date-" + indexIdForDateInDiv).classList.add("active")
+  }
+}
+function highlightAD(indexIdForDateInDiv) {
+  document.querySelector("#date-" + indexIdForDateInDiv).getElementsByTagName('small')[0].classList.add('redDate')
 }
 
-function bsToAD(currentBSDate, firstBar) {
-  z = new Date()
-  adDate = new Date(z.setDate(z.getDate() - (firstBar + 1 - currentBSDate)))
+function bsToAD(adDate) {
+  adDate = new Date(adDate);
   return adDate.getDate() == 1 ? adDate.toLocaleString('default', { month: 'short' }) : adDate.getDate()
 }
 
-// function getSmallAdcontent(firstBar, today, j) {
-//   adDate = new ADvalues(firstBar, today, j)
-//   return adDate.date == 1 ? adDate.month : adDate.date
-// }
 
-function domFill(today, firstBar, lastday, id) {
-  console.log(today)
+
+function domFill(today, firstBar, lastday, highlightTodayStatus, bsDate) {
+  var bsYear = bsDate.split(" ")[2]
+  var bsMonth = bsDate.split(" ")[1]
+
+
   for (let i = 0; i <= 7; i++) {
     if (i == firstBar) {
       for (let j = 0; j < lastday; j++) {
+        // let daysDiffCount = daysDiff(new Date().toLocaleDateString())
+        // let bar = new bikram(todayToBS(daysDiffCount))
+
+        var bsFullYear = `${j + 1}-${bsMonth}-${bsYear}`;
+
+
+        // console.log("year inside the brain", bsFullYear)
+        var daysDiffFromBS = bsSlider(bsFullYear);
+        var adDateFromBSdiff = currentDayinAD(daysDiffFromBS);
         var indexIdForDateInDiv = j + firstBar;
         document.querySelector("#date-" + indexIdForDateInDiv).getElementsByTagName('span')[0].textContent = nepaliNum(j + 1)
-        document.querySelector("#date-" + indexIdForDateInDiv).getElementsByTagName('small')[0].textContent = bsToAD(j + 1, firstBar)
+        document.querySelector("#date-" + indexIdForDateInDiv).getElementsByTagName('small')[0].textContent = bsToAD(adDateFromBSdiff)
         if (indexIdForDateInDiv == today) {
-          highlightToday(indexIdForDateInDiv + firstBar - 1)
+          highlightToday(indexIdForDateInDiv + firstBar - 1, highlightTodayStatus)
+        }
+        if (typeof (bsToAD(j + 1, firstBar)) === 'string') {
+          highlightAD(indexIdForDateInDiv)
         }
       }
     }
@@ -213,69 +257,90 @@ function domFill(today, firstBar, lastday, id) {
 }
 
 
-function domFillDiffrentMonth(firstBar, lastday) {
-  document.querySelector("#printer").innerHTML = firstBar
-  document.querySelector("#header").innerHTML = lastday
 
-  for (let j = 1; j <= 42; j++) {
-    document.querySelector("#date-" + j).innerHTML = ""
-  }
-  document.querySelector(".active").classList.remove("active")
-  for (let i = 1; i <= 7; i++) {
-    if (i == firstBar) {
-      for (let j = firstBar; j <= parseInt(lastday) + firstBar; j++) {
-        document.querySelector("#date-" + j).innerHTML = `${nepaliNum(j - firstBar + 1)}<small class=""></small>`
-      }
-    }
-  }
-  document.getElementById("next").remove()
-  document.getElementById("prev").remove()
-
-}
 
 
 document.addEventListener('DOMContentLoaded', function () {
+  let daysDurationFromMarker = daysDiff(new Date().toLocaleDateString())
+
   var prevlink = document.getElementById('prev');
   var nextlink = document.getElementById('next');
-  prevlink.addEventListener('click', function () {
-    prevMonthDaysDiffCount = daysDiffCount - today - 1
-    let barx = new bikram(todayToBS(prevMonthDaysDiffCount))
-    let lastdayCurrentx = barx.monthLastDay
-    barx.printMonth()
-    barx.printYear()
-    x = new Date()
-    sumdays = parseInt(today) + parseInt(lastdayCurrentx) - 1
-    x.setDate(x.getDate() - sumdays)
-    aMonthEarlierDateBar = x.getDay() + 1
-    domFillDiffrentMonth(aMonthEarlierDateBar, lastdayCurrentx - 1)
-  });
-  // onClick's logic below:
+  // 
   nextlink.addEventListener('click', function () {
-    nextMonthDaysDiffCount = daysDiffCount + (lastdayCurrent - (today - bar.firstBar)) + 1
-    let barx = new bikram(todayToBS(nextMonthDaysDiffCount))
-    let firstBarCurrentx = barx.firstBar
-    let lastdayCurrentx = barx.monthLastDay
-    let todayx = barx.todayInNumber
-    barx.printMonth()
-    barx.printYear()
-    x = new Date()
-    sumdays = parseInt(lastdayCurrentx) - parseInt(barx.todayInNumber) - 1
-    x.setDate(x.getDate() + sumdays)
-    aMonthEarlierDateBar = x.getDay()
-    // document.querySelector("#printer").innerHTML =aMonthEarlierDateBar
-    // document.querySelector("#header").innerHTML = lastday
-    domFillDiffrentMonth(aMonthEarlierDateBar, lastdayCurrentx)
+    checkToady = new bikram(todayToBS(daysDurationFromMarker))
+    m = checkToady.monthLastDay
+    n = checkToady.todayInNumber
+    daysDurationFromMarker = daysDurationFromMarker + m - n + 1;
+    let bar = new bikram(todayToBS(daysDurationFromMarker))
+    elements = document.querySelectorAll(".date")
+    elements.forEach(element => {
+      element.getElementsByTagName('span')[0].textContent = ''; // Replace 'New Text' with the desired text
+    });
+    elements.forEach(element => {
+      element.getElementsByTagName('small')[0].textContent = ''; // Replace 'New Text' with the desired text
+    });
+    elements.forEach(element => {
+      element.classList.remove("active") // Replace 'New Text' with the desired text
+    });
+    let lastdayCurrent = bar.monthLastDay
+    let today = bar.todayInNumber
+    let bsFullYear = bar.fullYear
+
+    let z = new Date('4-14-2021')
+    a = z.setDate(z.getDate() + daysDurationFromMarker - bar.todayInNumber + 1)
+    firstBarCurrent = new Date(a).getDay()
+    bar.printMonth()
+    bar.printYear()
+    domFill(today, firstBarCurrent, lastdayCurrent, false, bsFullYear)
+  });
+
+  prevlink.addEventListener('click', function () {
+    checkToady = new bikram(todayToBS(daysDurationFromMarker))
+    m = checkToady.monthLastDay
+    n = checkToady.todayInNumber
+    daysDurationFromMarker = daysDurationFromMarker - n - 1;
+    let bar = new bikram(todayToBS(daysDurationFromMarker))
+    elements = document.querySelectorAll(".date")
+    elements.forEach(element => {
+      element.getElementsByTagName('span')[0].textContent = ''; // Replace 'New Text' with the desired text
+    });
+    elements.forEach(element => {
+      element.getElementsByTagName('small')[0].textContent = ''; // Replace 'New Text' with the desired text
+    });
+    elements.forEach(element => {
+      element.classList.remove("active") // Replace 'New Text' with the desired text
+    });
+    let lastdayCurrent = bar.monthLastDay
+    let today = bar.todayInNumber
+    let bsFullYear = bar.fullYear
+
+    let z = new Date('4-14-2021')
+
+    a = z.setDate(z.getDate() + daysDurationFromMarker - bar.todayInNumber + 1)
+    firstBarCurrent = new Date(a).getDay()
+    bar.printMonth()
+    bar.printYear()
+    domFill(today, firstBarCurrent, lastdayCurrent, false, bsFullYear)
   });
 });
 
-
 let daysDiffCount = daysDiff(new Date().toLocaleDateString())
 let bar = new bikram(todayToBS(daysDiffCount))
-// let bar = new bikram('2078-1-1')
+// //
+// aja = 861
+// x = 861
+// let bar = new bikram(todayToBS(x))
+// //
 let firstBarCurrent = bar.firstBar
+// 
+// let z = new Date('4-14-2021')
+// a = z.setDate(z.getDate() + x - bar.todayInNumber + 1)
+// firstBarCurrent = new Date(a).getDay()
+// 
 let lastdayCurrent = bar.monthLastDay
 let today = bar.todayInNumber
+let bsFullYear = bar.fullYear
 bar.printMonth()
 bar.printYear()
 
-domFill(today, firstBarCurrent, lastdayCurrent, "dateHolder")
+domFill(today, firstBarCurrent, lastdayCurrent, true, bsFullYear)
