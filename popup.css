@@ -1,0 +1,56 @@
+.container {
+  width: 210px;
+  display: flex;
+  flex-wrap: wrap;
+}
+.item{
+  width: 30px;
+  height: 30px;
+  text-align: center;
+}
+.active{
+  background-color: tomato;
+  color: white;
+}
+.month{
+  justify-content: center;
+  background-color: tomato;
+  color: white;
+  font-size: 16px;
+  padding: 16px;
+}
+.date{
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+.date small{
+  margin-top: -6px;
+  font-size: 9px;
+}
+.redDate{
+  color:tomato;
+}
+
+.redDate.active{
+  color:white;
+}
+.headerbar{
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  background-color: tomato;
+  align-items: center;
+}
+.monthNavigator{
+  padding: 0 0.5em;
+  display: flex;
+  justify-content: center;
+  color: white;
+  background-color: tomato;
+  align-items: center;
+  font-size: large;
+}
+.monthNavigator:hover{
+  cursor: pointer;
+}
