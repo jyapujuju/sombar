@@ -237,9 +237,6 @@ function domFill(today, firstBar, lastday, highlightTodayStatus, bsDate) {
         // let bar = new bikram(todayToBS(daysDiffCount))
 
         var bsFullYear = `${j + 1}-${bsMonth}-${bsYear}`;
-
-
-        // console.log("year inside the brain", bsFullYear)
         var daysDiffFromBS = bsSlider(bsFullYear);
         var adDateFromBSdiff = currentDayinAD(daysDiffFromBS);
         var indexIdForDateInDiv = j + firstBar;
@@ -248,7 +245,7 @@ function domFill(today, firstBar, lastday, highlightTodayStatus, bsDate) {
         if (indexIdForDateInDiv == today) {
           highlightToday(indexIdForDateInDiv + firstBar - 1, highlightTodayStatus)
         }
-        if (typeof (bsToAD(j + 1, firstBar)) === 'string') {
+        if (adDateFromBSdiff.getDate() == 1) {
           highlightAD(indexIdForDateInDiv)
         }
       }
@@ -256,7 +253,14 @@ function domFill(today, firstBar, lastday, highlightTodayStatus, bsDate) {
   }
 }
 
-
+function resetDOM(elements) {
+  elements.forEach(element => {
+    element.getElementsByTagName('span')[0].textContent = ''; // Replace 'New Text' with the desired text
+    element.getElementsByTagName('small')[0].textContent = ''; // Replace 'New Text' with the desired text
+    element.classList.remove("active") // Replace 'New Text' with the desired text
+    element.getElementsByTagName('small')[0].classList.remove("redDate"); // Replace 'New Text' with the desired text
+  });
+}
 
 
 
@@ -273,15 +277,7 @@ document.addEventListener('DOMContentLoaded', function () {
     daysDurationFromMarker = daysDurationFromMarker + m - n + 1;
     let bar = new bikram(todayToBS(daysDurationFromMarker))
     elements = document.querySelectorAll(".date")
-    elements.forEach(element => {
-      element.getElementsByTagName('span')[0].textContent = ''; // Replace 'New Text' with the desired text
-    });
-    elements.forEach(element => {
-      element.getElementsByTagName('small')[0].textContent = ''; // Replace 'New Text' with the desired text
-    });
-    elements.forEach(element => {
-      element.classList.remove("active") // Replace 'New Text' with the desired text
-    });
+    resetDOM(elements)
     let lastdayCurrent = bar.monthLastDay
     let today = bar.todayInNumber
     let bsFullYear = bar.fullYear
@@ -301,15 +297,8 @@ document.addEventListener('DOMContentLoaded', function () {
     daysDurationFromMarker = daysDurationFromMarker - n - 1;
     let bar = new bikram(todayToBS(daysDurationFromMarker))
     elements = document.querySelectorAll(".date")
-    elements.forEach(element => {
-      element.getElementsByTagName('span')[0].textContent = ''; // Replace 'New Text' with the desired text
-    });
-    elements.forEach(element => {
-      element.getElementsByTagName('small')[0].textContent = ''; // Replace 'New Text' with the desired text
-    });
-    elements.forEach(element => {
-      element.classList.remove("active") // Replace 'New Text' with the desired text
-    });
+    resetDOM(elements)
+
     let lastdayCurrent = bar.monthLastDay
     let today = bar.todayInNumber
     let bsFullYear = bar.fullYear
